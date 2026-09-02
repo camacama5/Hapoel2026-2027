@@ -436,6 +436,140 @@ button {
   margin: 0 0 20px;
 }
 
+/* ---------- Results page: participant list ---------- */
+
+.results-layout {
+  padding: 18px 20px 8px;
+}
+
+.participant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participant-item {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.participant-item--open {
+  border-color: var(--accent);
+}
+
+.participant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  background: none;
+  border: none;
+  text-align: right;
+  cursor: pointer;
+  min-height: 56px;
+}
+
+.participant-row__name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.participant-row__date {
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.inline-detail {
+  border-top: 1px solid var(--line);
+  padding: 10px 14px 14px;
+  background: var(--accent-tint);
+}
+
+.guess-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.guess-detail__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.92rem;
+}
+
+.guess-detail__row + .guess-detail__row {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.guess-detail__rank {
+  width: 22px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+
+.guess-detail__logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.guess-detail__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 20px;
+}
+
+.detail-panel {
+  display: none;
+}
+
+.detail-panel__hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.detail-panel__title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0 0 2px;
+}
+
+.detail-panel__subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.back-link-wrap {
+  padding: 4px 20px 28px;
+  text-align: center;
+}
+
+.back-link {
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
 /* ---------- Desktop layout (≥ 720px) ---------- */
 
 @media (min-width: 720px) {
@@ -533,5 +667,36 @@ button {
     max-width: 320px;
     margin: 0 auto;
     display: block;
+  }
+
+  /* Results page */
+
+  .results-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+    padding: 20px 20px 8px;
+  }
+
+  .inline-detail {
+    display: none;
+  }
+
+  .detail-panel {
+    display: block;
+    position: sticky;
+    top: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 18px 20px;
+  }
+
+  .detail-panel--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
   }
 }

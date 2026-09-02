@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>תוצאות — ניחוש טבלת הליגה</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="page-header">
+      <p class="page-header__title">כל הניחושים</p>
+      <p class="page-header__subtitle">
+        רשימת המשתתפים ששלחו ניחוש. לחצו על שם כדי לצפות בטבלה שלו.
+      </p>
+    </header>
+
+    <div class="results-layout">
+      <section class="participant-list" id="participant-list">
+        <!-- שורות המשתתפים נבנות דינמית ע"י js/results.js -->
+      </section>
+
+      <aside class="detail-panel detail-panel--empty" id="detail-panel">
+        <div id="detail-panel-body">
+          <p class="detail-panel__hint">בחר/י משתתף מהרשימה כדי לצפות בניחוש שלו.</p>
+        </div>
+      </aside>
+    </div>
+
+    <p class="empty-state" id="empty-state" hidden>
+      עדיין לא נשלחו ניחושים.
+    </p>
+
+    <div class="back-link-wrap">
+      <a class="back-link" href="index.html">← למילוי ניחוש</a>
+    </div>
+  </div>
+
+  <script src="js/teams.js"></script>
+  <script src="js/results.js"></script>
+</body>
+</html>
