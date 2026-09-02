@@ -1,0 +1,22 @@
+רשימת שמות קבצי הלוגו (באנגלית) לפי קבוצה
+============================================
+יש לשמור כל קובץ לוגו בתיקיית logos/ תחת השם המדויק שמופיע בעמודה הימנית.
+השמות תואמים בדיוק לשדה "logo" ב-js/teams.js — אם תשנה שם קובץ, עדכן גם שם.
+
+שם הקבוצה (עברית)                    שם קובץ הלוגו (logos/)
+--------------------------------------------------------------
+א.ס עירוני אשקלון                    ironi_ashkelon.png
+א.ס רמת השרון                        ramat_hasharon.png
+מכבי קריית גת                        maccabi_kiryat_gat.png
+מכבי רחובות                          maccabi_rehovot.png
+הפועל חיפה                           hapoel_haifa.png
+הפועל מגדל העמק-יזרעאל               hapoel_migdal_haemek.png
+מכבי פתח תקווה                       maccabi_petah_tikva.png
+אליצור שומרון                        elitzur_shomron.png
+אליצור יבנה                          elitzur_yavne.png
+מ.כ עוטף דרום                        otef_darom.png
+עירוני נהריה                         ironi_nahariya.png
+אליצור נתניה                         elitzur_netanya.png
+מכבי רעננה                           maccabi_raanana.png
+מכבי קריית מוצקין                    maccabi_kiryat_motzkin.png
+הפועל חבל מודיעין                    hapoel_hevel_modiin.png

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ניחוש טבלת הליגה</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="page-header">
+      <p class="page-header__title">ניחוש טבלת הליגה</p>
+      <p class="page-header__subtitle">
+        סדר/י את 15 הקבוצות מהמקום הראשון ועד האחרון, לפי הניחוש שלך לסיום העונה.
+        אפשר לשלוח ניחוש אחד בלבד, ולאחר השליחה לא ניתן לשנות אותו.
+      </p>
+    </header>
+
+    <div class="status-bar">
+      <span class="status-bar__count" id="progress-count">0 / 15 מולאו</span>
+      <span class="status-bar__track">
+        <span class="status-bar__fill" id="progress-fill"></span>
+      </span>
+    </div>
+
+    <section class="name-section">
+      <label class="field-label" for="participant-name">השם שלך</label>
+      <input
+        type="text"
+        id="participant-name"
+        class="name-input"
+        placeholder="לדוגמה: דני"
+        autocomplete="off"
+      />
+    </section>
+
+    <div class="layout">
+      <div class="slots" id="slots">
+        <!-- 15 השורות נבנות דינמית ע"י js/app.js -->
+      </div>
+
+      <aside class="side-preview" id="side-preview">
+        <p class="side-preview__title">הטבלה שלך</p>
+        <div id="side-preview-list"></div>
+      </aside>
+    </div>
+
+    <div class="footer-bar">
+      <p class="footer-hint" id="footer-hint">הזן/י שם כדי להמשיך.</p>
+      <button type="button" class="submit-btn" id="submit-btn" disabled>שליחת הניחוש</button>
+    </div>
+  </div>
+
+  <script src="js/teams.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
