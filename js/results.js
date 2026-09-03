@@ -8,55 +8,22 @@
  * הקוד ימשיך לעבוד בלי שינוי.
  */
 
-function shuffledTeamIds() {
-  const ids = TEAMS.map((t) => t.id);
-  for (let i = ids.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [ids[i], ids[j]] = [ids[j], ids[i]];
-  }
-  return ids;
-}
-
-const MOCK_GUESSES = [
-  {
-    id: "mock-1",
-    participantName: "אלעד",
-    submittedAt: new Date(2026, 8, 2, 14, 32),
-    teams: shuffledTeamIds(),
-  },
-  {
-    id: "mock-2",
-    participantName: "דני",
-    submittedAt: new Date(2026, 8, 2, 15, 7),
-    teams: shuffledTeamIds(),
-  },
-  {
-    id: "mock-3",
-    participantName: "מאיה",
-    submittedAt: new Date(2026, 8, 2, 20, 51),
-    teams: shuffledTeamIds(),
-  },
-  {
-    id: "mock-4",
-    participantName: "יוסי",
-    submittedAt: new Date(2026, 8, 3, 9, 21),
-    teams: shuffledTeamIds(),
-  },
-  {
-    id: "mock-5",
-    participantName: "נועה",
-    submittedAt: new Date(2026, 8, 4, 11, 3),
-    teams: shuffledTeamIds(),
-  },
-];
-
 /**
- * Placeholder לטעינת ניחושים. יוחלף בקריאה אמיתית ל-Firestore בשלב 6
- * (למשל: getDocs(collection(db, "guesses")) ), ומחזיר את אותה צורת נתונים.
+ * טוען ניחושים אמיתיים מ-collection "guesses" ב-Firestore, ממוינים לפי
+ * זמן שליחה. אם שדה submittedAt עדיין לא הגיע (למשל רגע אחרי כתיבה,
+ * עקב serverTimestamp), נשתמש בזמן נוכחי כברירת מחדל זמנית.
  */
-function loadGuesses() {
-  const sorted = [...MOCK_GUESSES].sort((a, b) => a.submittedAt - b.submittedAt);
-  return Promise.resolve(sorted);
+async function loadGuesses() {
+  const snapshot = await db.collection("guesses").orderBy("submittedAt", "asc").get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      participantName: data.participantName,
+      submittedAt: data.submittedAt ? data.submittedAt.toDate() : new Date(),
+      teams: data.teams || [],
+    };
+  });
 }
 
 // ---------- State ----------
@@ -216,7 +183,14 @@ function renderDetailPanel() {
 
 // ---------- Init ----------
 
-loadGuesses().then((guesses) => {
-  state.guesses = guesses;
-  renderAll();
-});
+loadGuesses()
+  .then((guesses) => {
+    state.guesses = guesses;
+    renderAll();
+  })
+  .catch((err) => {
+    console.error("שגיאה בטעינת הניחושים:", err);
+    el.list.innerHTML = "";
+    el.emptyState.hidden = false;
+    el.emptyState.textContent = "אירעה שגיאה בטעינת הניחושים. נסה/י לרענן את העמוד.";
+  });

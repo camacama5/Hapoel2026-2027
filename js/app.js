@@ -12,6 +12,9 @@ const state = {
   picks: Array(TOTAL_TEAMS).fill(null),
   activeSlot: null, // אינדקס המקום שהפאנל שלו פתוח כרגע, או null
   submitted: false,
+  closingDate: null, // נטען מ-Firestore באתחול
+  isClosed: false,
+  loading: true,
 };
 
 // ---------- Elements ----------
@@ -119,7 +122,7 @@ function renderSlots() {
     }
 
     row.addEventListener("click", () => {
-      if (state.submitted) return;
+      if (state.submitted || state.loading || state.isClosed) return;
       state.activeSlot = isActive ? null : index;
       renderSlots();
       if (state.activeSlot === index) {
@@ -259,9 +262,13 @@ function renderFooter() {
   const complete = filledCount() === TOTAL_TEAMS;
   const hasName = state.participantName.trim().length > 0;
 
-  el.submitBtn.disabled = !(complete && hasName) || state.submitted;
+  el.submitBtn.disabled = state.loading || state.isClosed || !(complete && hasName) || state.submitted;
 
-  if (state.submitted) {
+  if (state.loading) {
+    el.footerHint.textContent = "טוען...";
+  } else if (state.isClosed) {
+    el.footerHint.textContent = `המשחק נסגר להגשות בתאריך ${formatDate(state.closingDate)}.`;
+  } else if (state.submitted) {
     el.footerHint.textContent = "הניחוש נשלח ונעול.";
   } else if (!hasName) {
     el.footerHint.textContent = "הזן/י שם כדי להמשיך.";
@@ -270,6 +277,14 @@ function renderFooter() {
   } else {
     el.footerHint.textContent = "כל המקומות מולאו — אפשר לשלוח את הניחוש.";
   }
+}
+
+function formatDate(date) {
+  if (!date) return "";
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const y = date.getFullYear();
+  return `${d}/${m}/${y}`;
 }
 
 // ---------- Name input ----------
@@ -319,6 +334,13 @@ function openConfirmModal() {
 }
 
 async function submitGuess() {
+  // בדיקת הגנה נוספת לפני שליחה בפועל (ההגנה האמיתית היא ב-Security Rules, שלב 7)
+  if (state.isClosed) {
+    alert("המשחק נסגר להגשות ולא ניתן יותר לשלוח ניחוש.");
+    renderFooter();
+    return;
+  }
+
   state.submitted = true;
   el.submitBtn.disabled = true;
   el.submitBtn.textContent = "שולח...";
@@ -339,12 +361,34 @@ async function submitGuess() {
 }
 
 /**
- * Placeholder לשמירה. יוחלף בכתיבה אמיתית ל-Firestore בשלב 6.
- * מחזיר Promise כדי שקל יהיה להחליף בקריאת Firebase אמיתית בהמשך.
+ * שמירה אמיתית ל-Firestore, לתוך collection בשם "guesses".
  */
 function saveGuess(guessData) {
-  console.log("TODO: שמירה ל-Firestore בשלב 6. נתונים:", guessData);
-  return new Promise((resolve) => setTimeout(resolve, 400));
+  return db.collection("guesses").add({
+    participantName: guessData.participantName,
+    teams: guessData.teams,
+    submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+/**
+ * טוען את מועד הסגירה ממסמך config/gameSettings.
+ * אם המסמך או השדה לא קיימים (למשל לפני שהוגדר ידנית בקונסולה),
+ * המשחק נשאר פתוח כברירת מחדל.
+ */
+async function loadGameSettings() {
+  try {
+    const snap = await db.collection("config").doc("gameSettings").get();
+    if (snap.exists && snap.data().closingDate) {
+      state.closingDate = snap.data().closingDate.toDate();
+      state.isClosed = new Date() > state.closingDate;
+    }
+  } catch (err) {
+    console.error("שגיאה בטעינת הגדרות המשחק:", err);
+  } finally {
+    state.loading = false;
+    renderAll();
+  }
 }
 
 function showSuccessScreen() {
@@ -352,12 +396,15 @@ function showSuccessScreen() {
     <div class="success-screen">
       <div class="success-screen__icon">✓</div>
       <p class="success-screen__title">הניחוש נשלח בהצלחה!</p>
-      <p class="success-screen__body">הניחוש שלך נשמר ונעול לעריכה. בהמשך תוכל/י לצפות בכל הניחושים בעמוד התוצאות.</p>
+      <p class="success-screen__body">הניחוש שלך נשמר ונעול לעריכה. מעביר אותך לעמוד התוצאות...</p>
     </div>
   `;
-  // בשלב מאוחר יותר: window.location.href = "results.html";
+  setTimeout(() => {
+    window.location.href = "results.html";
+  }, 1800);
 }
 
 // ---------- Init ----------
 
 renderAll();
+loadGameSettings();
