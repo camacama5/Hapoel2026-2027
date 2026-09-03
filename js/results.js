@@ -192,5 +192,11 @@ loadGuesses()
     console.error("שגיאה בטעינת הניחושים:", err);
     el.list.innerHTML = "";
     el.emptyState.hidden = false;
-    el.emptyState.textContent = "אירעה שגיאה בטעינת הניחושים. נסה/י לרענן את העמוד.";
+    if (err && err.code === "permission-denied") {
+      // צפוי כל עוד המשחק פתוח - לפי סעיף 13 באפיון, הניחושים מוצגים
+      // רק לאחר מועד הסגירה, כדי שאף אחד לא "יעתיק" מהניחוש של אחרים.
+      el.emptyState.textContent = "התוצאות יוצגו כאן רק לאחר מועד הסגירה של המשחק.";
+    } else {
+      el.emptyState.textContent = "אירעה שגיאה בטעינת הניחושים. נסה/י לרענן את העמוד.";
+    }
   });

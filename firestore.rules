@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // רשימת מזהי הקבוצות התקפים - חייבת להיות זהה בדיוק לזו שב-js/teams.js.
+    // אם תשנה/תוסיף/תגרע קבוצה ב-teams.js, עדכן גם כאן.
+    function validTeamIds() {
+      return [
+        "ironi_ashkelon", "ramat_hasharon", "maccabi_kiryat_gat",
+        "maccabi_rehovot", "hapoel_haifa", "hapoel_migdal_haemek",
+        "maccabi_petah_tikva", "elitzur_shomron", "elitzur_yavne",
+        "otef_darom", "ironi_nahariya", "elitzur_netanya",
+        "maccabi_raanana", "maccabi_kiryat_motzkin", "hapoel_hevel_modiin"
+      ];
+    }
+
+    function closingDate() {
+      return get(/databases/$(database)/documents/config/gameSettings).data.closingDate;
+    }
+
+    function gameIsOpen() {
+      return request.time < closingDate();
+    }
+
+    // ---------- config ----------
+    // קריאה פתוחה לכולם - הקליינט צריך לדעת מהו מועד הסגירה כדי להציג הודעות מתאימות.
+    // כתיבה חסומה לגמרי - עריכה אפשרית רק דרך קונסולת Firebase (שם, לא דרך האתר).
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------- guesses ----------
+    match /guesses/{guessId} {
+
+      // לפי סעיף 13 באפיון: בזמן שהמשחק פתוח, אף אחד לא רואה ניחושים של אחרים.
+      // אחרי מועד הסגירה, כולם יכולים לראות הכל.
+      allow read: if request.time > closingDate();
+
+      // יצירת ניחוש חדש - כל התנאים הבאים חייבים להתקיים ביחד:
+      allow create: if
+        gameIsOpen() &&
+        // בדיוק שלושת השדות האלה, לא יותר ולא פחות - מונע הזרקת שדות זרים
+        request.resource.data.keys().hasOnly(["participantName", "teams", "submittedAt"]) &&
+        request.resource.data.participantName is string &&
+        request.resource.data.participantName.size() > 0 &&
+        request.resource.data.participantName.size() <= 40 &&
+        request.resource.data.teams is list &&
+        request.resource.data.teams.size() == 15 &&
+        // כל 15 הערכים חייבים להיות מתוך רשימת הקבוצות התקפה
+        request.resource.data.teams.hasOnly(validTeamIds()) &&
+        // אין כפילויות - אורך הסט (ערכים ייחודיים) חייב להיות 15
+        request.resource.data.teams.toSet().size() == 15 &&
+        // חותמת הזמן חייבת להגיע מהשרת (serverTimestamp), לא מהדפדפן - אי אפשר לזייף תאריך
+        request.resource.data.submittedAt == request.time;
+
+      // נעילה מוחלטת: אחרי יצירה, שום ניחוש לא ניתן לעריכה או מחיקה מהאתר -
+      // לא של המשתמש עצמו ולא של אף אחד אחר. גם מנהל המשחק פועל רק דרך קונסולת Firebase.
+      allow update, delete: if false;
+    }
+  }
+}
