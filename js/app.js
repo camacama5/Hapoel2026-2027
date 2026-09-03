@@ -125,13 +125,8 @@ function renderSlots() {
       if (state.submitted || state.loading || state.isClosed) return;
       state.activeSlot = isActive ? null : index;
       renderSlots();
-      if (state.activeSlot === index) {
-        // מיקוד בשדה החיפוש אחרי שהוא נרנדר
-        requestAnimationFrame(() => {
-          const input = document.getElementById(`search-input-${index}`);
-          if (input) input.focus();
-        });
-      }
+      // הערה: בכוונה לא מפעילים focus() אוטומטי - המקלדת תיפתח רק
+      // כשהמשתמש בעצמו יקיש על שדה החיפוש, לא אוטומטית בפתיחת השורה.
     });
 
     slotEl.appendChild(row);
@@ -212,12 +207,8 @@ function selectTeam(index, teamId) {
   const next = firstEmptySlotAfter(index);
   state.activeSlot = next;
   renderAll();
-  if (next !== null) {
-    requestAnimationFrame(() => {
-      const input = document.getElementById(`search-input-${next}`);
-      if (input) input.focus();
-    });
-  }
+  // הערה: בכוונה לא מפעילים focus() אוטומטי כאן - המקלדת תיפתח רק
+  // כשהמשתמש עצמו יקיש על שדה החיפוש, לא בכל מעבר אוטומטי בין מקומות.
 }
 
 function renderSidePreview() {
@@ -298,6 +289,7 @@ el.nameInput.addEventListener("input", () => {
 
 el.submitBtn.addEventListener("click", () => {
   if (el.submitBtn.disabled) return;
+  if (document.activeElement) document.activeElement.blur();
   openConfirmModal();
 });
 

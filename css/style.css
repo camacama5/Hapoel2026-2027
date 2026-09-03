@@ -54,11 +54,28 @@ button {
   text-align: center;
 }
 
+.page-header__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  margin: 0 0 12px;
+}
+
 .page-header__title {
   font-size: 1.5rem;
   font-weight: 800;
   margin: 0 0 6px;
   letter-spacing: -0.01em;
+}
+
+.page-header__tagline {
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin: 0 auto 10px;
+  color: #fff;
 }
 
 .page-header__subtitle {
@@ -573,33 +590,61 @@ button {
 /* ---------- Desktop layout (≥ 720px) ---------- */
 
 @media (min-width: 720px) {
+  html {
+    font-size: 17px;
+  }
+
   body {
     padding-bottom: 0;
   }
 
   .app {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
     padding-bottom: 60px;
   }
 
   .page-header {
+    padding: 40px 32px 32px;
     border-radius: 0 0 var(--radius-m) var(--radius-m);
+  }
+
+  .page-header__title {
+    font-size: 2rem;
+  }
+
+  .page-header__subtitle {
+    font-size: 1.05rem;
+    max-width: 50ch;
   }
 
   .status-bar {
     position: static;
     border-radius: var(--radius-m);
-    margin: 18px 20px 0;
+    margin: 24px 32px 0;
+    padding: 14px 24px;
     border: 1px solid var(--line);
+  }
+
+  .name-section {
+    padding: 24px 32px 8px;
   }
 
   .layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 28px;
     align-items: start;
-    padding: 0 20px;
+    padding: 0 32px;
+  }
+
+  .slot__row {
+    padding: 14px 18px;
+    min-height: 64px;
+  }
+
+  .slot__team-name {
+    font-size: 1.05rem;
   }
 
   .slots {
@@ -660,13 +705,15 @@ button {
     box-shadow: none;
     border: none;
     background: none;
-    padding: 20px 0 0;
+    padding: 24px 32px 0;
   }
 
   .submit-btn {
-    max-width: 320px;
+    max-width: 340px;
     margin: 0 auto;
     display: block;
+    padding: 15px 18px;
+    font-size: 1.05rem;
   }
 
   /* Results page */
@@ -674,9 +721,9 @@ button {
   .results-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 28px;
     align-items: start;
-    padding: 20px 20px 8px;
+    padding: 24px 32px 8px;
   }
 
   .inline-detail {
