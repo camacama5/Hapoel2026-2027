@@ -499,6 +499,14 @@ button {
   flex-shrink: 0;
 }
 
+.participant-row--locked {
+  cursor: default;
+}
+
+.participant-row--locked .participant-row__name {
+  color: var(--ink-soft);
+}
+
 .inline-detail {
   border-top: 1px solid var(--line);
   padding: 10px 14px 14px;

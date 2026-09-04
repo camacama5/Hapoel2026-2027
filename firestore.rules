@@ -19,12 +19,20 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/config/gameSettings).data.closingDate;
     }
 
+    function revealDate() {
+      return get(/databases/$(database)/documents/config/gameSettings).data.revealDate;
+    }
+
     function gameIsOpen() {
       return request.time < closingDate();
     }
 
+    function resultsRevealed() {
+      return request.time > revealDate();
+    }
+
     // ---------- config ----------
-    // קריאה פתוחה לכולם - הקליינט צריך לדעת מהו מועד הסגירה כדי להציג הודעות מתאימות.
+    // קריאה פתוחה לכולם - הקליינט צריך לדעת מהם מועדי הסגירה/החשיפה.
     // כתיבה חסומה לגמרי - עריכה אפשרית רק דרך קונסולת Firebase (שם, לא דרך האתר).
     match /config/{docId} {
       allow read: if true;
@@ -32,31 +40,38 @@ service cloud.firestore {
     }
 
     // ---------- guesses ----------
+    // מסמך "ציבורי" - רק שם המשתתף ותאריך השליחה. בכוונה בלי הקבוצות עצמן,
+    // כדי שאפשר יהיה להראות "מי כבר ניחש" בלי לחשוף את תוכן הניחוש.
     match /guesses/{guessId} {
+      allow read: if true;
 
-      // לפי סעיף 13 באפיון: בזמן שהמשחק פתוח, אף אחד לא רואה ניחושים של אחרים.
-      // אחרי מועד הסגירה, כולם יכולים לראות הכל.
-      allow read: if request.time > closingDate();
-
-      // יצירת ניחוש חדש - כל התנאים הבאים חייבים להתקיים ביחד:
       allow create: if
         gameIsOpen() &&
-        // בדיוק שלושת השדות האלה, לא יותר ולא פחות - מונע הזרקת שדות זרים
-        request.resource.data.keys().hasOnly(["participantName", "teams", "submittedAt"]) &&
+        request.resource.data.keys().hasOnly(["participantName", "submittedAt"]) &&
         request.resource.data.participantName is string &&
         request.resource.data.participantName.size() > 0 &&
         request.resource.data.participantName.size() <= 40 &&
-        request.resource.data.teams is list &&
-        request.resource.data.teams.size() == 15 &&
-        // כל 15 הערכים חייבים להיות מתוך רשימת הקבוצות התקפה
-        request.resource.data.teams.hasOnly(validTeamIds()) &&
-        // אין כפילויות - אורך הסט (ערכים ייחודיים) חייב להיות 15
-        request.resource.data.teams.toSet().size() == 15 &&
-        // חותמת הזמן חייבת להגיע מהשרת (serverTimestamp), לא מהדפדפן - אי אפשר לזייף תאריך
         request.resource.data.submittedAt == request.time;
 
-      // נעילה מוחלטת: אחרי יצירה, שום ניחוש לא ניתן לעריכה או מחיקה מהאתר -
-      // לא של המשתמש עצמו ולא של אף אחד אחר. גם מנהל המשחק פועל רק דרך קונסולת Firebase.
+      allow update, delete: if false;
+    }
+
+    // ---------- guessTeams ----------
+    // מסמך "פרטי" - 15 הקבוצות שנוחשו, עם אותו מזהה כמו ב-guesses.
+    // קריאה חסומה עד מועד החשיפה (revealDate) - זה מה שמונע "העתקה" בזמן שהמשחק פתוח.
+    match /guessTeams/{guessId} {
+      allow read: if resultsRevealed();
+
+      allow create: if
+        gameIsOpen() &&
+        // מוודא שקיים מסמך guesses תואם (לא ניתן ליצור guessTeams "יתום")
+        exists(/databases/$(database)/documents/guesses/$(guessId)) &&
+        request.resource.data.keys().hasOnly(["teams"]) &&
+        request.resource.data.teams is list &&
+        request.resource.data.teams.size() == 15 &&
+        request.resource.data.teams.hasOnly(validTeamIds()) &&
+        request.resource.data.teams.toSet().size() == 15;
+
       allow update, delete: if false;
     }
   }

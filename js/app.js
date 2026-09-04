@@ -353,14 +353,25 @@ async function submitGuess() {
 }
 
 /**
- * שמירה אמיתית ל-Firestore, לתוך collection בשם "guesses".
+ * שמירה אמיתית ל-Firestore, בשני מסמכים מקושרים (אותו מזהה) שנכתבים יחד
+ * באופן אטומי (batch):
+ *  - guesses/{id}      - שם + תאריך שליחה בלבד. גלוי לכולם תמיד.
+ *  - guessTeams/{id}   - 15 הקבוצות. חסום לקריאה עד מועד החשיפה (ב-Security Rules).
  */
 function saveGuess(guessData) {
-  return db.collection("guesses").add({
+  const guessRef = db.collection("guesses").doc();
+  const teamsRef = db.collection("guessTeams").doc(guessRef.id);
+
+  const batch = db.batch();
+  batch.set(guessRef, {
     participantName: guessData.participantName,
-    teams: guessData.teams,
     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
+  batch.set(teamsRef, {
+    teams: guessData.teams,
+  });
+
+  return batch.commit();
 }
 
 /**
