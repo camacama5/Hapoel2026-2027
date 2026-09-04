@@ -59,13 +59,13 @@ service cloud.firestore {
     // ---------- guessTeams ----------
     // מסמך "פרטי" - 15 הקבוצות שנוחשו, עם אותו מזהה כמו ב-guesses.
     // קריאה חסומה עד מועד החשיפה (revealDate) - זה מה שמונע "העתקה" בזמן שהמשחק פתוח.
+    // הערה: אין כאן בדיקת exists() מול guesses/{guessId}, כי שני המסמכים נכתבים
+    // יחד באותו batch, ובדיקת exists() על מסמך שנכתב באותה פעולה לא אמינה.
     match /guessTeams/{guessId} {
       allow read: if resultsRevealed();
 
       allow create: if
         gameIsOpen() &&
-        // מוודא שקיים מסמך guesses תואם (לא ניתן ליצור guessTeams "יתום")
-        exists(/databases/$(database)/documents/guesses/$(guessId)) &&
         request.resource.data.keys().hasOnly(["teams"]) &&
         request.resource.data.teams is list &&
         request.resource.data.teams.size() == 15 &&
